@@ -81,7 +81,7 @@ func byDateGlobal(data [][]string, date string) (int, error) {
 func latestByCountry(data [][]string, country string) (int, error) {
 	var total int
 	var countryData string
-	countryEntryFound := 0
+	var countryEntryFound bool = false
 	regex, err := regexp.Compile("[^a-z]+")
 	if err != nil {
 		return 0, err
@@ -90,7 +90,7 @@ func latestByCountry(data [][]string, country string) (int, error) {
 	for idx, row := range data {
 		countryData = regex.ReplaceAllString(strings.ToLower(row[1]), "")
 		if idx > 0 && countryData == strings.ToLower(country) {
-			countryEntryFound++
+			countryEntryFound = true
 			currentRow := row[len(row)-1]
 			confirmed, err := strconv.Atoi(currentRow)
 			if err != nil {
@@ -100,7 +100,7 @@ func latestByCountry(data [][]string, country string) (int, error) {
 		}
 	}
 
-	if countryEntryFound == 0 {
+	if countryEntryFound == false {
 		err := errors.New("Country '" + country + "' not found")
 		return 0, err
 	}
@@ -112,7 +112,7 @@ func byDateCountry(data [][]string, date string, country string) (int, error) {
 	var total int
 	var colIndex int
 	var countryData string
-	countryEntryFound := 0
+	var countryEntryFound bool = false
 	regex, err := regexp.Compile("[^a-z]+")
 	if err != nil {
 		return 0, err
@@ -127,7 +127,7 @@ func byDateCountry(data [][]string, date string, country string) (int, error) {
 	for idx, row := range data {
 		countryData = regex.ReplaceAllString(strings.ToLower(row[1]), "")
 		if idx > 0 && countryData == strings.ToLower(country) {
-			countryEntryFound++
+			countryEntryFound = true
 			currentRow := row[colIndex]
 			confirmed, err := strconv.Atoi(currentRow)
 			if err != nil {
@@ -138,8 +138,8 @@ func byDateCountry(data [][]string, date string, country string) (int, error) {
 		}
 	}
 
-	if countryEntryFound == 0 {
-		err := errors.New("Country'" + country + "' not found")
+	if countryEntryFound == false {
+		err := errors.New("Country '" + country + "' not found")
 		return 0, err
 	}
 
