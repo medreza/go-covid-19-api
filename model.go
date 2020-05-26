@@ -18,10 +18,16 @@ func (r *DataResponse) activeCases() int {
 }
 
 func (r *DataResponse) recoveryRate() float32 {
+	if r.Data.Confirmed == 0 {
+		return 0
+	}
 	return float32(r.Data.Recovered) / float32(r.Data.Confirmed)
 }
 
 func (r *DataResponse) fatalityRate() float32 {
+	if r.Data.Confirmed == 0 {
+		return 0
+	}
 	return float32(r.Data.Deaths) / float32(r.Data.Confirmed)
 }
 
