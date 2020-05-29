@@ -56,19 +56,20 @@ func latestGlobal(data [][]string) (int, error) {
 // byDateGlobal sums up all cases at given date
 func byDateGlobal(data [][]string, date string) (int, error) {
 	var total int
-	var colIndex int
+	var dateColIndex int
 
 	for idx, column := range data[0] {
 		if date == column {
-			colIndex = idx
+			dateColIndex = idx
 		}
 	}
 
 	for idx, row := range data {
 		if idx > 0 {
-			currentRow := row[colIndex]
+			currentRow := row[dateColIndex]
 			confirmed, err := strconv.Atoi(currentRow)
 			if err != nil {
+				err := errors.New("Either date format is wrong, or data at this date does not exist")
 				return 0, err
 			}
 			total += confirmed
@@ -110,7 +111,7 @@ func latestByCountry(data [][]string, country string) (int, error) {
 // byDateCountry sums up cases at given date within given country name
 func byDateCountry(data [][]string, date string, country string) (int, error) {
 	var total int
-	var colIndex int
+	var dateColIndex int
 	var countryData string
 	var countryEntryFound bool = false
 	regex, err := regexp.Compile("[^a-z]+")
@@ -120,7 +121,7 @@ func byDateCountry(data [][]string, date string, country string) (int, error) {
 
 	for idx, column := range data[0] {
 		if date == column {
-			colIndex = idx
+			dateColIndex = idx
 		}
 	}
 
@@ -128,7 +129,7 @@ func byDateCountry(data [][]string, date string, country string) (int, error) {
 		countryData = regex.ReplaceAllString(strings.ToLower(row[1]), "")
 		if idx > 0 && countryData == strings.ToLower(country) {
 			countryEntryFound = true
-			currentRow := row[colIndex]
+			currentRow := row[dateColIndex]
 			confirmed, err := strconv.Atoi(currentRow)
 			if err != nil {
 				err := errors.New("Either date format is wrong, or data at this date does not exist")

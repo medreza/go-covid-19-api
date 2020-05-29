@@ -2,9 +2,10 @@ package main
 
 import (
 	"encoding/csv"
-	"encoding/json"
 	"net/http"
 	"strings"
+
+	"github.com/gin-gonic/gin"
 )
 
 // Read CSV from URL
@@ -34,14 +35,13 @@ func dateURLHandler(dateFormat string) string {
 }
 
 // create JSON response for global/country data
-func createDataJSONResponse(w http.ResponseWriter, err error, confirmed int, recovered int, deaths int) {
-	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+func createDataJSONResponse(c *gin.Context, err error, confirmed int, recovered int, deaths int) {
 
 	if err != nil {
 		response := &ErrorResponse{}
 		response.Ok = false
 		response.Error.Message = err.Error()
-		json.NewEncoder(w).Encode(response)
+		c.JSON(http.StatusOK, response)
 	} else {
 		response := &DataResponse{}
 		response.Ok = true
@@ -51,6 +51,6 @@ func createDataJSONResponse(w http.ResponseWriter, err error, confirmed int, rec
 		response.Data.Active = response.activeCases()
 		response.Data.RecoveryRate = response.recoveryRate()
 		response.Data.FatalityRate = response.fatalityRate()
-		json.NewEncoder(w).Encode(response)
+		c.JSON(http.StatusOK, response)
 	}
 }

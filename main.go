@@ -2,27 +2,29 @@ package main
 
 import (
 	"log"
-	"net/http"
 
-	"github.com/gorilla/mux"
+	"github.com/gin-gonic/gin"
 	"github.com/pkg/errors"
 )
 
 func main() {
-	router := mux.NewRouter().StrictSlash(true)
+	router := gin.Default()
 
 	// Define routes and their handler
-	router.HandleFunc("/api/latest/global", LatestGlobalRoute)
-	router.HandleFunc("/api/latest/{countryName}", LatestCountryRoute)
-	router.HandleFunc("/api/{date}/global", ByDateGlobalRoute)
-	router.HandleFunc("/api/{date}/{countryName}", ByDateCountryRoute)
+	api := router.Group("/api")
+	{
+		api.GET("/latest/global", LatestGlobalRoute)
+		api.GET("/latest/country/:countryName", LatestCountryRoute)
+		api.GET("/date/:date/global", ByDateGlobalRoute)
+		api.GET("/date/:date/country/:countryName", ByDateCountryRoute)
+	}
 
 	// Serve
-	log.Fatal(http.ListenAndServe(":80", router))
+	log.Fatal(router.Run(":80"))
 }
 
 // LatestGlobalRoute responses global cases at latest date available
-func LatestGlobalRoute(w http.ResponseWriter, r *http.Request) {
+func LatestGlobalRoute(c *gin.Context) {
 	confirmedData, err := confirmedData()
 	if err != nil {
 		err = errors.Wrap(err, err.Error())
@@ -50,13 +52,12 @@ func LatestGlobalRoute(w http.ResponseWriter, r *http.Request) {
 		err = errors.Wrap(err, err.Error())
 	}
 
-	createDataJSONResponse(w, errors.Cause(err), confirmed, recovered, deaths)
+	createDataJSONResponse(c, errors.Cause(err), confirmed, recovered, deaths)
 }
 
 // LatestCountryRoute responses country cases at latest date available
-func LatestCountryRoute(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	countryName := vars["countryName"]
+func LatestCountryRoute(c *gin.Context) {
+	countryName := c.Param("countryName")
 
 	confirmedData, err := confirmedData()
 	if err != nil {
@@ -85,14 +86,13 @@ func LatestCountryRoute(w http.ResponseWriter, r *http.Request) {
 		err = errors.Wrap(err, err.Error())
 	}
 
-	createDataJSONResponse(w, errors.Cause(err), confirmed, recovered, deaths)
+	createDataJSONResponse(c, errors.Cause(err), confirmed, recovered, deaths)
 }
 
 // ByDateCountryRoute responses country cases at given date
-func ByDateCountryRoute(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	countryName := vars["countryName"]
-	date := vars["date"]
+func ByDateCountryRoute(c *gin.Context) {
+	countryName := c.Param("countryName")
+	date := c.Param("date")
 
 	date = dateURLHandler(date)
 
@@ -123,13 +123,12 @@ func ByDateCountryRoute(w http.ResponseWriter, r *http.Request) {
 		err = errors.Wrap(err, err.Error())
 	}
 
-	createDataJSONResponse(w, errors.Cause(err), confirmed, recovered, deaths)
+	createDataJSONResponse(c, errors.Cause(err), confirmed, recovered, deaths)
 }
 
 // ByDateGlobalRoute responses global cases at given date
-func ByDateGlobalRoute(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	date := vars["date"]
+func ByDateGlobalRoute(c *gin.Context) {
+	date := c.Param("date")
 
 	date = dateURLHandler(date)
 
@@ -160,5 +159,5 @@ func ByDateGlobalRoute(w http.ResponseWriter, r *http.Request) {
 		err = errors.Wrap(err, err.Error())
 	}
 
-	createDataJSONResponse(w, errors.Cause(err), confirmed, recovered, deaths)
+	createDataJSONResponse(c, errors.Cause(err), confirmed, recovered, deaths)
 }
