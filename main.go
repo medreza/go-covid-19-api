@@ -4,8 +4,11 @@ import (
 	"log"
 
 	"github.com/gin-gonic/gin"
+	"github.com/gomodule/redigo/redis"
 	"github.com/pkg/errors"
 )
+
+var pool *redis.Pool = newRedisPool()
 
 func main() {
 	router := gin.Default()
