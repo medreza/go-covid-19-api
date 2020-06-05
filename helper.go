@@ -8,11 +8,13 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
+	"github.com/gomodule/redigo/redis"
 )
 
 // Read CSV from URL with Redis caching
-func readCSV(csvURL string) ([][]string, error) {
+func readCSV(csvURL string, pool *redis.Pool) ([][]string, error) {
 	conn := pool.Get()
+	defer conn.Close()
 
 	cachedCSV, _ := getRedisCache(csvURL, conn)
 	if cachedCSV == "" {
@@ -30,13 +32,11 @@ func readCSV(csvURL string) ([][]string, error) {
 		}
 
 		cachedCSV = string(bodyBytes)
-		err = setRedisCache(csvURL, cachedCSV, 12*3600, conn)
+		err = setRedisCache(csvURL, cachedCSV, 6*3600, conn)
 		if err != nil {
 			return nil, err
 		}
 	}
-
-	defer conn.Close()
 
 	reader := csv.NewReader(strings.NewReader(cachedCSV))
 	data, err := reader.ReadAll()

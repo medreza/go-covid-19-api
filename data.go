@@ -5,32 +5,34 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+
+	"github.com/gomodule/redigo/redis"
 )
 
-func confirmedData() ([][]string, error) {
+func confirmedData(pool *redis.Pool) ([][]string, error) {
 	confirmedCSV := "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/" +
 		"csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_confirmed_global.csv"
-	confirmed, err := readCSV(confirmedCSV)
+	confirmed, err := readCSV(confirmedCSV, pool)
 	if err != nil {
 		return nil, err
 	}
 	return confirmed, nil
 }
 
-func recoveredData() ([][]string, error) {
+func recoveredData(pool *redis.Pool) ([][]string, error) {
 	recoveredCSV := "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/" +
 		"csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_recovered_global.csv"
-	recovered, err := readCSV(recoveredCSV)
+	recovered, err := readCSV(recoveredCSV, pool)
 	if err != nil {
 		return nil, err
 	}
 	return recovered, nil
 }
 
-func deathsData() ([][]string, error) {
+func deathsData(pool *redis.Pool) ([][]string, error) {
 	deathsCSV := "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/" +
 		"csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_deaths_global.csv"
-	deaths, err := readCSV(deathsCSV)
+	deaths, err := readCSV(deathsCSV, pool)
 	if err != nil {
 		return nil, err
 	}
